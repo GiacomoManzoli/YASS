@@ -244,6 +244,6 @@ public class Main {
             }
         }
 
-        System.out.println("Esecuzione completata. Durata totale: "+(System.currentTimeMillis() - startTime)/1000);
+        System.out.println("Esecuzione completata. Durata totale: "+(System.currentTimeMillis() - startTime)/1000+ " s");
     }
 }

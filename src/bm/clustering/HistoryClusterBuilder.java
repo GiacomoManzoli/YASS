@@ -9,7 +9,6 @@ public class HistoryClusterBuilder {
 
     public static List<ClusterSet> buildSetsFromHistory(List<String> words, List<MergeHistoryRecord> history, float[] thresholds){
         /*
-        *
             Costruisce vari ClusterSet secondo lo storico di merge ricevuto come parametro.
             E' importante che l'ordine delle parole sia lo stesso con cui è stata calcolato lo storico
             dei merge, altrimenti si verificano situazioni di inconsistenza.

@@ -1,28 +1,43 @@
 package bm.clustering;
 
-/**
- * Created by gmanzoli on 18/12/16.
- */
 public class MinDistancePair {
+
+    static MinDistancePair min(MinDistancePair p1, MinDistancePair p2){
+        if (p1.dist < p2.dist){
+            return p1;
+        } else {
+            return p2;
+        }
+    }
+
     private int r;
     private int s;
     private float dist;
 
-    public MinDistancePair(int r, int s, float dist) {
+    MinDistancePair(int r, int s, float dist) {
         this.r = r;
         this.s = s;
         this.dist = dist;
     }
 
-    public int getR() {
+    int getR() {
         return r;
     }
 
-    public int getS() {
+    int getS() {
         return s;
     }
 
-    public float getDist() {
+    float getDist() {
         return dist;
+    }
+
+    @Override
+    public String toString() {
+        return "MinDistancePair{" +
+                "r=" + r +
+                ", s=" + s +
+                ", dist=" + dist +
+                '}';
     }
 }
