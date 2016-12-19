@@ -1,0 +1,10 @@
+language: java
+jdk:
+  - openjdk7
+deploy:
+  provider: releases
+  api_key: ${api_key}
+  file: 'build/libs/java-IR.jar'
+  skip_cleanup: true
+  on:
+    all_branches: true
