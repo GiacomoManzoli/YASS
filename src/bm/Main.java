@@ -142,6 +142,7 @@ public class Main {
             System.out.println("specificandola con il flag --file (-f)");
             System.out.println("");
             System.out.println("$ java main.class -f <experiment_file_path>");
+            return;
         }
         String propertiesFilePath = args[1];
         System.out.println("Carico esperimento da: "+ propertiesFilePath);
@@ -244,6 +245,6 @@ public class Main {
             }
         }
 
-        System.out.println("Esecuzione completata. Durata totale: "+(System.currentTimeMillis() - startTime)/1000);
+        System.out.println("Esecuzione completata. Durata totale: "+(System.currentTimeMillis() - startTime)/1000+ " s");
     }
 }

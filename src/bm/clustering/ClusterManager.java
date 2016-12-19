@@ -4,27 +4,53 @@ import bm.yass.DistanceMeasure;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 
-/**
- * Created by gmanzoli on 17/12/16.
- */
-class ClusterManager {
+
+public class ClusterManager {
+
+    static ForkJoinPool commonPool = new ForkJoinPool(); // Usa tutti i core possibili
 
     private List<Cluster> clusters;
     private DistanceMeasure d;
-    private int n;
-    private float[] dist;
+    float[] dist;
 
-    private int _k(int i, int j){
-        int k = (n*(n-1)/2) - (n-i)*((n-i)-1)/2 + j - i - 1;
-        k = (n*(n-1)/2) - 1 - k;
+
+    /* Formule per la conversione degli indici (occhio che la matrice è flippata)
+    * i = n - 2 - floor(sqrt(-8*k + 4*n*(n-1)-7)/2.0 - 0.5)
+    * j = k + i + 1 - n*(n-1)/2 + (n-i)*((n-i)-1)/2
+    * k = (n*(n-1)/2) - (n-i)*((n-i)-1)/2 + j - i - 1
+    * */
+    int _k(int i, int j){
+        int n = clusters.size();
+        int k = (n *(n-1))/2 - ( (n-i)*(n-i-1) )/2 + j - i - 1;
+        k = ( n*(n-1) )/2 - 1 - k;
         return k;
     }
 
-    ClusterManager(List<Cluster> clusters, DistanceMeasure d) {
+    int _i(int k){
+        int n = clusters.size();
+        k = ( n*(n-1) )/2 - 1 - k; // ritrasformo k
+        int i = n - 2 - (int)Math.floor(Math.sqrt(-8*k + 4*n*(n-1)-7)/2 - 0.5);
+        if (i == -1){
+            int x= 2;
+        }
+        return  i; // i
+    }
+
+    int _j(int k){
+        int n = clusters.size();
+        int i = _i(k); // _i trasforma k, quindi devo calcolarlo prima
+        k = (n*(n-1))/2 - 1 - k; // ritrasformo k
+        return k + i + 1 - (n*(n-1))/2 + ((n-i)*((n-i)-1))/2;// j
+    }
+
+
+
+    public ClusterManager(List<Cluster> clusters, DistanceMeasure d) {
         this.clusters = clusters;
         this.d = d;
-        this.n = clusters.size();
+        int n = clusters.size();
 
         int tot = (n*(n-1))/2;
         dist = new float[tot];
@@ -32,18 +58,11 @@ class ClusterManager {
         System.out.println("Creo la matrice delle distanze...");
         int printInterval = (int)Math.max(100, tot*0.05);
         int cnt = 0;
+        double currentMin = 10;
         long startTime = System.currentTimeMillis();
-        for (int i = 0; i < n; i++) {
-            for (int j = i+1; j<n; j++) {
-                int k = _k(i,j);
-                dist[k] = clusters.get(i).distance(clusters.get(j), this.d);
-                cnt += 1;
-                if (cnt % (printInterval)  == 0) {
-                    System.out.println("Creati " + cnt + " nodi su "+ tot + " - Tempo trascorso: "+ (System.currentTimeMillis() - startTime)/1000 + "s");
-                }
-            }
-        }
-        System.out.println("Fine creazione matrice");
+
+        BuildDistanceMatrixTask.buildDistanceMatrix(this, d);
+        System.out.println("Fine creazione matrice. Tempo necessario "+(System.currentTimeMillis()-startTime)/1000 +" s");
     }
 
     void deleteClusters(int r, int s){
@@ -52,6 +71,7 @@ class ClusterManager {
         // Per ogni indice che cancello tutte le coppie in cui compare.
         // Potenzialmente sono 2n, ma so che sono n, perché le coppie sono ordinate.
         // -1 perché (r,s) è contanta 2 volte in n
+        int n = clusters.size();
         int[] toDelete = new int[2*(n-1) -1]; // una coppia è presente 2 volte
         int toDeleteCnt = 0;
         // vale sempre r < s
@@ -120,13 +140,12 @@ class ClusterManager {
 
         clusters.remove(r);
         clusters.remove(s -1);
-        this.n = clusters.size();
     }
 
     void insert(Cluster cluster){
         // Non serve modificare la dimensione del vettore, vado ad occupare lo spazio garbage del vettore.
         clusters.add(0, cluster);
-        this.n = clusters.size();
+        int n = clusters.size();
 
         // Calcolo le nuove distanze
         int i = 0;  // Ho inserito il cluster in testa, ha indice 0
@@ -136,31 +155,8 @@ class ClusterManager {
         }
     }
 
-    MinDistancePair findMinDistancePair() {
-        float minDist = Float.POSITIVE_INFINITY;
-        int r = -1;
-        int s = -1;  // Coppia di cluster a distanza minima
-
-        for (int i = 0; i < n; i++){ // non considero la digonale
-            for (int j = i + 1; j < n; j++){
-                int k = _k(i,j);
-                if (dist[k] <= minDist){ // <= perché la distanza può essere infinita!
-                    minDist = dist[k];
-                    r = i;
-                    s = j;
-                }
-            }
-        }
-
-        // Devo stare attento all'ordine in cui cancello i dati
-        // perché dopo che ho tolto un elemento l'indice dell'altro cambia.
-        // assum0 che r sia l'indice minore
-        if (s < r) {
-            int t = r;
-            r = s;
-            s = t;
-        }
-        return new MinDistancePair(r,s, minDist);
+    public MinDistancePair findMinDistancePair() {
+        return FindMinDistancePairTask.findMinDistancePair(this);
     }
 
     int size() {

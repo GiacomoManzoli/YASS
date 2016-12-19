@@ -1,8 +1,8 @@
 package bm;
 
-import bm.clustering.HierarchicalClustering;
-import bm.clustering.MergeHistoryRecord;
+import bm.clustering.*;
 import bm.yass.DistanceManager;
+import bm.yass.DistanceMeasure;
 import bm.yass.Experiment;
 
 import java.io.*;
@@ -26,25 +26,9 @@ public class Test {
     private static final String DN_DATA = "graph_data";
 
 
-    private static void saveMergeHistory(String expName, String distanceName, List<MergeHistoryRecord> mergeHistory){
-        System.out.println("Salvo i merge history per la distanza "+ distanceName+"...");
-        String filePath = D_OUTPUTS + "/"+expName+"/"+DN_HISTORIES+"/merge_history_"+distanceName+".mh";
-
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream("dn.txt"), "utf-8"))) {
-            //  f.write("%s,%s,%s,%s\n" % (str(m.c1), str(m.c2), str(m.dist), str(m.cnt)))
-            for (MergeHistoryRecord m : mergeHistory){
-                writer.write(m.getC1()+ "," + m.getC2()+","+m.getDist()+","+m.getCnt()+"\n");
-            }
-        } catch (Exception e){
-            System.err.println(e.getMessage());
-        }
-
-    }
 
     public static void main(String[] args) {
         List<String> lines = new ArrayList<>();
-
 
 
         try {
@@ -66,9 +50,21 @@ public class Test {
 
         System.out.println(lines.size());
         System.out.println(lines.get(lines.size()-1));
-        lines = lines.subList(50000,51000);
+        lines = lines.subList(50000,60000);
 
-        List<MergeHistoryRecord> historyRecords = HierarchicalClustering.calculateClusters(DistanceManager.d3(), lines);
-        saveMergeHistory("",DistanceManager.d3().getName(),historyRecords);
+        List<Cluster> clusters = new ArrayList<>();
+        for (int i = 0; i < lines.size(); i++){
+            List<String> clusterWords = new ArrayList<>();
+            clusterWords.add(lines.get(i));
+            clusters.add(new Cluster(i, clusterWords));
+        }
+        int nextId = lines.size();
+        ClusterManager manager = new ClusterManager(clusters, DistanceManager.d3());
+
+        long startTime = System.currentTimeMillis();
+        MinDistancePair minDistancePair = manager.findMinDistancePair();
+        System.out.println(System.currentTimeMillis() - startTime);
+        System.out.println(minDistancePair.toString());
+
     }
 }
