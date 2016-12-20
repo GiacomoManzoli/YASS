@@ -43,7 +43,7 @@ public class HistoryClusterBuilder {
                 +   # creo quindi uno snapshot del set e lo aggiungo in lista
                 * */
                 ClusterSet newSet = clusterSet.copy();
-                newSet.setThreshold(thresholds[0]);
+                newSet.setThreshold(thresholds[cntThreshold]);
                 snapshots.add(newSet);
                 cntThreshold++;
             }

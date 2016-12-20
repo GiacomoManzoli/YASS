@@ -8,7 +8,7 @@ public class ClusterSet {
     private Map<Integer, Cluster> dict;
     private float threshold;
 
-    public ClusterSet(float threshold) {
+    ClusterSet(float threshold) {
         this.dict = new HashMap<>();
         this.threshold = threshold;
     }
@@ -17,15 +17,15 @@ public class ClusterSet {
         return threshold;
     }
 
-    public void setThreshold(float threshold) {
+    void setThreshold(float threshold) {
         this.threshold = threshold;
     }
 
-    public void addCluster(Cluster cluster){
+    void addCluster(Cluster cluster){
         dict.put(cluster.getId(), cluster);
     }
 
-    public void removeCluster(int clusterId) {
+    void removeCluster(int clusterId) {
         if (dict.keySet().contains(clusterId)) {
             dict.remove(clusterId);
         }
@@ -39,7 +39,7 @@ public class ClusterSet {
         return dict.keySet();
     }
 
-    public ClusterSet copy() {
+    ClusterSet copy() {
         ClusterSet newCopy = new ClusterSet(threshold);
 
         for (Integer key : dict.keySet()) {

@@ -114,7 +114,7 @@ public class Main {
     private static void saveStemmedDict(String expName, Map<String, String> dictionary, String distanceName, float threshold) {
         Object[] keys = dictionary.keySet().toArray();
         Arrays.sort(keys);
-        String filePath = D_OUTPUTS + "/"+expName+"/"+DN_STEMMED_DICT+"/sd"+distanceName+"_"+threshold+".dict";
+        String filePath = D_OUTPUTS + "/"+expName+"/"+DN_STEMMED_DICT+"/sd_"+distanceName+"_"+threshold+".dict";
 
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(filePath), "utf-8"))) {

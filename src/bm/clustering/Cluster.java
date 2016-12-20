@@ -78,11 +78,6 @@ public class Cluster {
         return this.longestPrefix;
     }
 
-
-    public boolean contains(String w) {
-        return this.words.contains(w);
-    }
-
     int getId() {
         return id;
     }
