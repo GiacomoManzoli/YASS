@@ -2,3 +2,6 @@
 .idea
 outputs
 out
+build
+.gradle
+
