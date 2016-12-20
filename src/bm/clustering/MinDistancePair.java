@@ -32,6 +32,22 @@ public class MinDistancePair {
         return dist;
     }
 
+    int compareTo(MinDistancePair aPair) {
+        /*
+            a negative int if this < that
+            0 if this == that
+            a positive int if this > that
+        * */
+        if (this.dist < aPair.dist){
+            return -1;
+        }
+        if (this.dist == aPair.dist){
+            return 0;
+        }
+        // this.dist > aPair.dist
+        return 1;
+    }
+
     @Override
     public String toString() {
         return "MinDistancePair{" +

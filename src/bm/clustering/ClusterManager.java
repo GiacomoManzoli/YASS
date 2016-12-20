@@ -210,8 +210,8 @@ class ClusterManager {
         }
     }
 
-    MinDistancePair findMinDistancePair() {
-        return FindMinDistancePairTask.findMinDistancePair(this);
+    List<MinDistancePair> findMinDistancePairs() {
+        return FindMinDistancePairTask.findMinDistancePairs(this);
     }
 
     int size() {
