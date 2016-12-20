@@ -3,7 +3,9 @@ package bm.clustering;
 import bm.yass.DistanceMeasure;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class HierarchicalClustering {
@@ -33,21 +35,41 @@ public class HierarchicalClustering {
         int cntIter = 0;
         long startTime = System.currentTimeMillis();
         while (manager.size() != 1){
-            MinDistancePair minDistancePair = manager.findMinDistancePair();
-            final int r = minDistancePair.getR();
-            final int s = minDistancePair.getS();
-            // minDistancePair.getR() < minDistancePair.getS()
+            List<MinDistancePair> minDistancePairs = manager.findMinDistancePairs();
+            // indici dei cluster che ho mergiato in questa iterazione
+            // Questo perché lo stesso cluster può comparire in più coppie a distanza minima
+            Set<Integer> mergedCluster = new HashSet<>();
+            List<Cluster> newClusters = new ArrayList<>();
 
-            historyRecords.add(new MergeHistoryRecord(
-                    manager.getCluster(r).getId(),
-                    manager.getCluster(s).getId(),
-                    minDistancePair.getDist(),
-                    manager.size() -1)
-            );
-            Cluster merged = Cluster.merge(nextId, manager.getCluster(r), manager.getCluster(s));
-            nextId++;
-            manager.deleteClusters(r,s);
-            manager.insert(merged);
+            for (MinDistancePair pair: minDistancePairs) {
+                int r = pair.getR();
+                int s = pair.getS();
+                if (mergedCluster.contains(r) || mergedCluster.contains(s)){
+                    continue; // Se uno dei due indici è già stato mergiato, salto la coppia
+                }
+                // r < s
+                newClusters.add(Cluster.merge(nextId, manager.getCluster(r), manager.getCluster(s)));
+                mergedCluster.add(r);
+                mergedCluster.add(s);
+                nextId++;
+
+                historyRecords.add(new MergeHistoryRecord(
+                        manager.getCluster(r).getId(),
+                        manager.getCluster(s).getId(),
+                        pair.getDist(),
+                        manager.size() - newClusters.size())
+                );
+
+
+            }
+
+            List<Integer> toDelete = new ArrayList<>();
+            toDelete.addAll(mergedCluster);
+            manager.deleteClusters(toDelete);
+
+            for (Cluster c : newClusters) {
+                manager.insert(c);
+            }
 
             cntIter++;
 
