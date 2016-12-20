@@ -1,8 +1,5 @@
 package bm.clustering;
 
-/**
- * Created by gmanzoli on 18/12/16.
- */
 public class MergeHistoryRecord {
 
     private int c1;

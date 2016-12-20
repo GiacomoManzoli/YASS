@@ -7,14 +7,13 @@ import java.util.concurrent.RecursiveTask;
 
 public class ClusterDistanceTask extends RecursiveTask<Float> {
 
-    private static final int SEQUENTIAL_THRESHOLD = 5000;
+    private static int SEQUENTIAL_THRESHOLD = 5000;
 
     private Cluster c1;
     private Cluster c2;
     private int start;
     private int end;
     private DistanceMeasure d;
-    private int n1;
     private int n2;
 
     private ClusterDistanceTask(Cluster c1, Cluster c2, DistanceMeasure d, int start, int end) {
@@ -23,7 +22,6 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
         this.start = start;
         this.end = end;
         this.d = d;
-        this.n1 = c1.getWords().size();
         this.n2 = c2.getWords().size();
         /*
         * Per suddividere il lavoro tra più thread enumero le coppie
@@ -73,6 +71,9 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
         int n1 = c1.getWords().size();
         int n2 = c2.getWords().size();
         int last = n1 * n2;
+        // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
+        int cores = Runtime.getRuntime().availableProcessors();
+        SEQUENTIAL_THRESHOLD = (int)Math.ceil((double) last / (4.0*cores));
         return ClusterManager.commonPool.invoke(new ClusterDistanceTask(c1, c2, d, 0, last));
     }
 }
