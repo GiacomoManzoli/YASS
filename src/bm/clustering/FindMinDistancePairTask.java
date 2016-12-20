@@ -54,8 +54,8 @@ public class FindMinDistancePairTask extends RecursiveTask<MinDistancePair>{
 
     static MinDistancePair findMinDistancePair(ClusterManager manager) {
         // Da notare
-        int n = manager.size();
-        long last = (long)(n * (n-1))/(long)2;
+        long n = manager.size();
+        long last = (n * (n-1))/(long)2;
         // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
         int cores = Runtime.getRuntime().availableProcessors();
         SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) last / (4.0*cores));

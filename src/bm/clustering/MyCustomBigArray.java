@@ -6,8 +6,8 @@ import java.util.List;
 
 public class MyCustomBigArray {
 
-    //private static final int ARRAY_SIZE = 10;
-    private static final int ARRAY_SIZE = Integer.MAX_VALUE/2;
+    private static final int ARRAY_SIZE = 10;
+    //private static final int ARRAY_SIZE = Integer.MAX_VALUE/2;
 
     private long size;
     private int arraysCount;

@@ -151,7 +151,7 @@ class ClusterManager {
         }
     }
 
-    public MinDistancePair findMinDistancePair() {
+    MinDistancePair findMinDistancePair() {
         return FindMinDistancePairTask.findMinDistancePair(this);
     }
 
@@ -160,6 +160,13 @@ class ClusterManager {
     }
 
     Cluster getCluster(int i){
-        return clusters.get(i);
+        try{
+            return clusters.get(i);
+
+        } catch (Exception e) {
+            System.out.println("i "+i);
+            System.out.println("size:" + clusters.size());
+            return  null;
+        }
     }
 }
