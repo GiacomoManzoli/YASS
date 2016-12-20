@@ -50,9 +50,21 @@ public class Test {
 
         System.out.println(lines.size());
         System.out.println(lines.get(lines.size()-1));
-        lines = lines.subList(50000,60000);
+        lines = lines.subList(50000,55539);
 
-        List<Cluster> clusters = new ArrayList<>();
+        MyCustomBigArray bigArray = new MyCustomBigArray((long)Integer.MAX_VALUE + (long)1);
+        for (long i = 0; i < bigArray.getSize(); i++){
+            bigArray.set(i, i);
+            assert bigArray.get(i) == i;
+        }
+
+        bigArray.resize(19);
+        for (long i = 0; i < bigArray.getSize(); i++){
+            bigArray.set(i, i);
+            assert bigArray.get(i) == i;
+        }
+
+        /*List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < lines.size(); i++){
             List<String> clusterWords = new ArrayList<>();
             clusterWords.add(lines.get(i));
@@ -64,7 +76,7 @@ public class Test {
         long startTime = System.currentTimeMillis();
         MinDistancePair minDistancePair = manager.findMinDistancePair();
         System.out.println(System.currentTimeMillis() - startTime);
-        System.out.println(minDistancePair.toString());
+        System.out.println(minDistancePair.toString());*/
 
     }
 }
