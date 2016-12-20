@@ -6,7 +6,7 @@ import java.util.List;
 
 public class MyCustomBigArray {
 
-    //private static final int ARRAY_SIZE = Integer.MAX_VALUE;
+    //private static final int ARRAY_SIZE = 10;
     private static final int ARRAY_SIZE = Integer.MAX_VALUE/2;
 
     private long size;
@@ -37,10 +37,14 @@ public class MyCustomBigArray {
     }
 
     public float get(long index) {
-        int arrayIndex = (int) (index/arraysCount);
+        int arrayIndex = (int) (index/ARRAY_SIZE);
         int innerIndex = (int) (index - ((long)arrayIndex * ARRAY_SIZE));
-
-        return arrays.get(arrayIndex)[innerIndex];
+        try{
+            return arrays.get(arrayIndex)[innerIndex];
+        } catch (Exception e){
+            System.err.println("A");
+            return 0;
+        }
     }
 
     public void resize(long newSize) {
