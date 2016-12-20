@@ -2,8 +2,7 @@ package bm.clustering;
 
 import bm.yass.DistanceMeasure;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
 
@@ -61,12 +60,72 @@ class ClusterManager {
         System.out.println("Fine creazione matrice. Tempo necessario "+(System.currentTimeMillis()-startTime)/1000 +" s");
     }
 
+    void deleteClusters(List<Integer> indexes){
+        Collections.sort(indexes);
+        int n = clusters.size();
+        Set<Long> toDelete = new HashSet<>();
+
+        for (int r : indexes) {
+            // calcolo le coppie del tipo (*,r)
+            for (int i = 0; i < r; i++) {
+                long index = _k(i,r);
+                if (index >= 0 && index < dist.getSize()){
+                    toDelete.add(index);
+                }
+            }
+            // calcolo le coppie del tipo (r,*) (c'è (r,s))
+            // sono consecutive e ce ne sono n-r-1
+            for (int j = r+1; j < r+1+(n-r-1); j++) {
+                long index = _k(r,j);
+                if (index >= 0 && index < dist.getSize()){
+                    toDelete.add(index);
+                }
+            }
+        }
+
+        List<Long> toDeleteIndexes = new ArrayList<>();
+        toDeleteIndexes.addAll(toDelete);
+        // Ordino gli indici da cancellare in ordine decrescente
+        Collections.sort(toDeleteIndexes);
+        // Sovrascrivo i valori da cancellare compattando il vettore.
+        // Da notare la dimensione in memoria del vettore non decresce, questo per evitare di dover farne una copia.
+        // Un possibile miglioramento può essere che quando la parte garbage è tanto grande, si può effettuare il resize
+        long tot = (n*(n-1))/2;
+        int cntDeleted = 0;
+
+        for (long it = 0; it < tot; it++) {
+            // Se non ho ancora cancellato niente e non
+            // devo cancellare l'indice corrente, passo all'elemento successivo
+            if (cntDeleted == 0 && it != toDeleteIndexes.get(cntDeleted)) { continue; }
+
+            if (cntDeleted < toDelete.size() && it == toDeleteIndexes.get(cntDeleted))
+                cntDeleted += 1;
+
+            // Prima di copiare il prossimo indice, controllo di non copiare
+            // un indice che poi deve essere cancellato
+            while (cntDeleted < toDelete.size() && it + cntDeleted == toDeleteIndexes.get(cntDeleted))
+                cntDeleted += 1;
+
+            if (it + cntDeleted < tot)
+                dist.set(it, dist.get(it+cntDeleted));
+            else
+                break;
+        }
+
+        // Cancancello i cluster anche dalla lista
+        for (int i = 0; i < indexes.size(); i++) {
+            int adjustedIndex = indexes.get(i) - i;
+            clusters.remove(adjustedIndex);
+        }
+    }
+
     void deleteClusters(int r, int s){
         // r < s
         // Calcolo il numero di indici che devo cancellare
         // Per ogni indice che cancello tutte le coppie in cui compare.
         // Potenzialmente sono 2n, ma so che sono n, perché le coppie sono ordinate.
         // -1 perché (r,s) è contanta 2 volte in n
+
         int n = clusters.size();
         long[] toDelete = new long[2*(n-1) -1]; // una coppia è presente 2 volte
         int toDeleteCnt = 0;

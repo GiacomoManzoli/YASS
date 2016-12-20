@@ -46,7 +46,12 @@ public class HierarchicalClustering {
             );
             Cluster merged = Cluster.merge(nextId, manager.getCluster(r), manager.getCluster(s));
             nextId++;
-            manager.deleteClusters(r,s);
+
+            List<Integer> toDelete = new ArrayList<>();
+            toDelete.add(r);
+            toDelete.add(s);
+            manager.deleteClusters(toDelete);
+            //manager.deleteClusters(r,s);
             manager.insert(merged);
 
             cntIter++;
