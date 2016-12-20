@@ -1,6 +1,5 @@
 package bm;
 
-
 import bm.clustering.ClusterSet;
 import bm.clustering.HierarchicalClustering;
 import bm.clustering.HistoryClusterBuilder;
@@ -144,6 +143,9 @@ public class Main {
             System.out.println("$ java main.class -f <experiment_file_path>");
             return;
         }
+        int cores = Runtime.getRuntime().availableProcessors();
+        System.out.println("Numero di core disponibili: "+cores);
+
         String propertiesFilePath = args[1];
         System.out.println("Carico esperimento da: "+ propertiesFilePath);
 

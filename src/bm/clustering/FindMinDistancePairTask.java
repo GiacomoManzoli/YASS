@@ -3,7 +3,7 @@ package bm.clustering;
 import java.util.concurrent.RecursiveTask;
 
 public class FindMinDistancePairTask extends RecursiveTask<MinDistancePair>{
-    private static final int SEQUENTIAL_THRESHOLD = 100000;
+    private static int SEQUENTIAL_THRESHOLD = 100000;
 
     private ClusterManager manager;
     private int start;
@@ -56,6 +56,10 @@ public class FindMinDistancePairTask extends RecursiveTask<MinDistancePair>{
         // Da notare
         int n = manager.size();
         int last = (n * (n-1))/2;
+        // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
+        int cores = Runtime.getRuntime().availableProcessors();
+        SEQUENTIAL_THRESHOLD = (int)Math.ceil((double) last / (4.0*cores));
+
         return ClusterManager.commonPool.invoke(new FindMinDistancePairTask(manager, 0, last));
     }
 }
