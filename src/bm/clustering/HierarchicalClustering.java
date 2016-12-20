@@ -77,7 +77,7 @@ public class HierarchicalClustering {
                 System.out.println("Iterazione: " + cntIter + " numero di cluster presenti: "+ manager.size() + " - Tempo trascorso: "+ (System.currentTimeMillis() - startTime)/1000 + " s");
             }
         }
-
+        System.out.println("Iterazioni necessarie: "+cntIter);
         return historyRecords;
     }
 }
