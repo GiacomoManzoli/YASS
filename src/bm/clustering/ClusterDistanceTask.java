@@ -7,16 +7,16 @@ import java.util.concurrent.RecursiveTask;
 
 public class ClusterDistanceTask extends RecursiveTask<Float> {
 
-    private static int SEQUENTIAL_THRESHOLD = 5000;
+    private static long SEQUENTIAL_THRESHOLD = 5000;
 
     private Cluster c1;
     private Cluster c2;
-    private int start;
-    private int end;
+    private long start;
+    private long end;
     private DistanceMeasure d;
     private int n2;
 
-    private ClusterDistanceTask(Cluster c1, Cluster c2, DistanceMeasure d, int start, int end) {
+    private ClusterDistanceTask(Cluster c1, Cluster c2, DistanceMeasure d, long start, long end) {
         this.c1 = c1;
         this.c2 = c2;
         this.start = start;
@@ -29,12 +29,12 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
         * */
     }
 
-    private int _i(int k){
-        return k / n2; // divisione intera
+    private int _i(long k){
+        return (int)(k / n2); // divisione intera
     }
 
-    private int _j(int k){
-        return k % n2; // resto
+    private int _j(long k){
+        return (int)(k % n2); // resto
     }
 
     @Override
@@ -45,7 +45,7 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
 
             List<String> words1 = c1.getWords();
             List<String> words2 = c2.getWords();
-            for (int k = start; k < end; k++){
+            for (long k = start; k < end; k++){
                 int i = _i(k);
                 int j = _j(k);
                 float distance = d.calculate(words1.get(i), words2.get(j));
@@ -56,7 +56,7 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
             return maxDist;
         } else {
             // Troppo lavoro, lo divido!
-            int mid = start + (end - start) / 2;
+            long mid = start + (end - start) / 2;
             ClusterDistanceTask left  = new ClusterDistanceTask(c1, c2, d, start, mid);
             ClusterDistanceTask right = new ClusterDistanceTask(c1, c2, d, mid, end);
             left.fork();
@@ -70,10 +70,10 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
         // Da notare
         int n1 = c1.getWords().size();
         int n2 = c2.getWords().size();
-        int last = n1 * n2;
+        long last = n1 * n2;
         // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
         int cores = Runtime.getRuntime().availableProcessors();
-        SEQUENTIAL_THRESHOLD = (int)Math.ceil((double) last / (4.0*cores));
+        SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) last / (4.0*cores));
         return ClusterManager.commonPool.invoke(new ClusterDistanceTask(c1, c2, d, 0, last));
     }
 }
