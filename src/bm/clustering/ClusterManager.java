@@ -219,14 +219,6 @@ class ClusterManager {
     }
 
     Cluster getCluster(int i){
-        try{
-            return clusters.get(i);
-
-        } catch (Exception e) {
-            System.out.println("i "+i);
-            System.out.println("size:" + clusters.size());
-            System.exit(123);
-            return  null;
-        }
+        return clusters.get(i);
     }
 }
