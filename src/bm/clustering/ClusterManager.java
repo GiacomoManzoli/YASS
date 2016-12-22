@@ -28,20 +28,20 @@ class ClusterManager {
     }
 
     int _i(long k){
-        int n = clusters.size();
+        long n = clusters.size();
         k = ( n*(n-1) )/2 - 1 - k; // ritrasformo k
-        int i = n - 2 - (int)Math.floor(Math.sqrt(-8*k + 4*n*(n-1)-7)/2 - 0.5);
-        if (i == -1){
-            int x= 2;
-        }
-        return  i; // i
+        long i = n - 2 - (int)Math.floor(Math.sqrt(-8*k + 4*n*(n-1)-7)/2 - 0.5);
+        assert i <= Integer.MAX_VALUE;
+        return  (int)i; // i
     }
 
     int _j(long k){
-        int n = clusters.size();
+        long n = clusters.size();
         int i = _i(k); // _i trasforma k, quindi devo calcolarlo prima
         k = (n*(n-1))/2 - 1 - k; // ritrasformo k
-        return (int) (k + i + 1 - (n*(n-1))/2 + ((n-i)*((n-i)-1))/2); // j
+        long j =  (k + i + 1 - (n*(n-1))/2 + ((n-i)*((n-i)-1))/2); // j
+        assert j <= Integer.MAX_VALUE;
+        return (int)j;
     }
 
 
