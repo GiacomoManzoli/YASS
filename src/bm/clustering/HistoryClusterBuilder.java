@@ -58,11 +58,17 @@ public class HistoryClusterBuilder {
 
             Cluster cluster1 = clusterSet.getCluster(record.getC1());
             Cluster cluster2 = clusterSet.getCluster(record.getC2());
-            Cluster merged = Cluster.merge(nextId, cluster1, cluster2);
-            nextId++;
-            clusterSet.removeCluster(record.getC1());
-            clusterSet.removeCluster(record.getC2());
-            clusterSet.addCluster(merged);
+            try {
+                Cluster merged = Cluster.merge(nextId, cluster1, cluster2);
+                nextId++;
+                clusterSet.removeCluster(record.getC1());
+                clusterSet.removeCluster(record.getC2());
+                clusterSet.addCluster(merged);
+            } catch (Exception e){
+                System.err.println(e.toString());
+                System.exit(123);
+            }
+
         }
 
         return snapshots;

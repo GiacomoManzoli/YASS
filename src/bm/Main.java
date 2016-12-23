@@ -74,7 +74,7 @@ public class Main {
                 new FileOutputStream(filePath), "utf-8"))) {
             //  f.write("%s,%s,%s,%s\n" % (str(m.c1), str(m.c2), str(m.dist), str(m.cnt)))
             for (MergeHistoryRecord m : mergeHistory){
-                writer.write(m.getC1()+ "," + m.getC2()+","+m.getDist()+","+m.getCnt()+"\n");
+                writer.write(m.getC1()+ "," + m.getC2()+","+m.getCres() +","+m.getDist()+","+m.getCnt()+"\n");
             }
         } catch (Exception e){
             System.err.println(e.getMessage());
@@ -99,8 +99,9 @@ public class Main {
                 history.add(new MergeHistoryRecord(
                         Integer.parseInt(parts[0]),
                         Integer.parseInt(parts[1]),
-                        Float.parseFloat(parts[2]),
-                        Integer.parseInt(parts[3])
+                        Integer.parseInt(parts[2]),
+                        Float.parseFloat(parts[3]),
+                        Integer.parseInt(parts[4])
                 ));
             }
             in.close();
@@ -216,7 +217,13 @@ public class Main {
         List<MergeHistoryRecord> mergeHistory = new ArrayList<>();
         if (exp.getPipeline().contains(PIPE_CLUSTERING)) {
             System.out.println("Eseguo l'algoritmo di clustering con la misura "+exp.getDistanceMeasure().getName());
-            mergeHistory = HierarchicalClustering.calculateClusters(exp.getDistanceMeasure(), lexicon);
+
+            if (exp.isSplitAllowed()){
+                mergeHistory = HierarchicalClustering.calculateClustersSplitting(exp.getDistanceMeasure(), lexicon);
+            } else {
+                mergeHistory = HierarchicalClustering.calculateClustersSplitting(exp.getDistanceMeasure(), lexicon);
+            }
+
             System.out.println("Completato clustering! Tempo trascorso: " + (System.currentTimeMillis() - startTime)/1000);
 
             if (exp.getPipeline().contains(PIPE_SAVE_GRAPH_DATA)) {

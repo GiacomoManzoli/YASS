@@ -7,6 +7,7 @@ public class MergeHistoryRecord implements Comparable{
 
     private int c1;
     private int c2;
+    private int cres;
     private float dist;
     private int cnt;
 
@@ -17,9 +18,10 @@ public class MergeHistoryRecord implements Comparable{
      * @param dist distanza dei due cluster.
      * @param cnt numero di cluster rimanenti dopo l'operazione di merge.
      * */
-    public MergeHistoryRecord(int c1, int c2, float dist, int cnt) {
+    public MergeHistoryRecord(int c1, int c2, int cres, float dist, int cnt) {
         this.c1 = c1;
         this.c2 = c2;
+        this.cres = cres;
         this.dist = dist;
         this.cnt = cnt;
     }
@@ -45,6 +47,7 @@ public class MergeHistoryRecord implements Comparable{
         return "MergeHistoryRecord{" +
                 "c1=" + c1 +
                 ", c2=" + c2 +
+                ", cres=" + cres +
                 ", dist=" + dist +
                 ", cnt=" + cnt +
                 '}';
@@ -59,6 +62,7 @@ public class MergeHistoryRecord implements Comparable{
 
         if (c1 != that.c1) return false;
         if (c2 != that.c2) return false;
+        if (cres != that.cres) return false;
         return Float.compare(that.dist, dist) == 0 && cnt == that.cnt;
     }
 
@@ -70,10 +74,10 @@ public class MergeHistoryRecord implements Comparable{
             0 if this == that
             a positive int if this > that
         * */
-        if (this.equals(record)){
+        if (this.dist == record.dist){
             return 0;
         }
-        if (this.dist <= record.dist) {
+        if (this.dist < record.dist) {
             return -1;
         } else {
             return 1;
@@ -85,5 +89,17 @@ public class MergeHistoryRecord implements Comparable{
     }
     public void setC2(Integer c2) {
         this.c2 = c2;
+    }
+
+    public void setCnt(int cnt) {
+        this.cnt = cnt;
+    }
+
+    public int getCres() {
+        return cres;
+    }
+
+    public void setCres(int cres) {
+        this.cres = cres;
     }
 }

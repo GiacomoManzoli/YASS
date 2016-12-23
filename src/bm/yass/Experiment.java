@@ -19,6 +19,7 @@ public class Experiment{
     private static final String P_DISTANCE_THRESHOLDS = "experiment.thresholds";
     private static final String P_DISCARD_NUMBERS = "experiment.discard_numbers";
     private static final String P_STOPWORDS_PATH = "experiment.stopwords";
+    private static final String P_ALLOW_SPLIT = "experiment.allow_split";
 
     public static Experiment loadFromFile(String filePath){
         Experiment e = new Experiment();
@@ -38,6 +39,7 @@ public class Experiment{
             e.lexiconRangeEnd = Integer.parseInt(prop.getProperty(P_LEXICON_RANGE_END, "-1"));
             e.stopwordsPath = prop.getProperty(P_STOPWORDS_PATH);
             e.discardNumbers = Boolean.parseBoolean(prop.getProperty(P_DISCARD_NUMBERS));
+            e.allowSplit = Boolean.parseBoolean(prop.getProperty(P_ALLOW_SPLIT));
 
             String distanceName = prop.getProperty(P_DISTANCE);
             Method distanceCreator = DistanceManager.class.getMethod(distanceName);
@@ -84,6 +86,7 @@ public class Experiment{
     private float[] thresholds;
     private boolean discardNumbers;
     private String stopwordsPath;
+    private boolean allowSplit;
 
 
     public String getName() {
@@ -120,5 +123,9 @@ public class Experiment{
 
     public String getStopwordsPath() {
         return stopwordsPath;
+    }
+
+    public boolean isSplitAllowed() {
+        return allowSplit;
     }
 }
