@@ -2,12 +2,18 @@ package bm.clustering;
 
 import java.util.*;
 
-
+/**
+ * Classe che rappresenta un insieme di cluster ottenuti fermando l'algoritmo di clustering ad una certa soglia
+ * */
 public class ClusterSet {
 
     private Map<Integer, Cluster> dict;
     private float threshold;
 
+    /**
+     * Crea l'insieme di cluster, specificando qual'è la soglia di stop dell'algoritmo di clustering.
+     * @param threshold soglia di stop dell'algoritmo di clustering.
+     * */
     ClusterSet(float threshold) {
         this.dict = new HashMap<>();
         this.threshold = threshold;
@@ -39,6 +45,10 @@ public class ClusterSet {
         return dict.keySet();
     }
 
+    /**
+     * Effettua la copia profonda dell'oggetto.
+     * @retun copia profonda dell'oggetto.
+     * */
     ClusterSet copy() {
         ClusterSet newCopy = new ClusterSet(threshold);
 

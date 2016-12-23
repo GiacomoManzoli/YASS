@@ -11,7 +11,7 @@ public class BuildDistanceMatrixTask extends RecursiveAction {
     static void buildDistanceMatrix(ClusterManager manager, DistanceMeasure d){
         // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
         int cores = Runtime.getRuntime().availableProcessors();
-        SEQUENTIAL_THRESHOLD = (int)Math.ceil((double) manager.dist.getSize() / (4.0*cores));
+        SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) manager.dist.getSize() / (4.0*cores));
         ClusterManager.commonPool.invoke(new BuildDistanceMatrixTask(manager,d, 0, manager.dist.getSize()));
     }
 

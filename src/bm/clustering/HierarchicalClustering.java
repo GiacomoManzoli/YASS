@@ -7,21 +7,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
+/**
+ * Classe che implementa l'algoritmo di clustering agglomerativo gerarchico in complete linkage.
+ * */
 public class HierarchicalClustering {
 
+    /**
+     * Esegue il clustering gerarchico utilizzando come misura di distanza {@code d} e come parole quelle presenti
+     * nella lista {@code words}.
+     * @param d misura di distanza.
+     * @param words lista di parole da clusterizzare. Deve essere ordinata in ordine lessicografico.
+     * @return storico delle operazioni di merge effettuate dall'algoritmo.
+     * */
     public static List<MergeHistoryRecord> calculateClusters(DistanceMeasure d, List<String> words){
-        /*
-            Effettua il clustering gerarchico agglomerativo a partire da una lista di parole (words) ordinata
-            in oridine lessicografico.
-
-            :param d: Funzione per il calcolo della distanza
-            :param words: Lexicon
-            :return: Sequenza di merge effettuati durante il clustering
-         */
         int n = words.size();
         int printInterval = (int)Math.max(100, n*0.005);
 
+        // Crea n cluster, ognuno contenente una parola
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < words.size(); i++){
             List<String> clusterWords = new ArrayList<>();
@@ -30,17 +32,22 @@ public class HierarchicalClustering {
         }
         int nextId = n;
 
+        // Crea il cluster manager, l'oggetto che contiene la matrice delle distanze.
         ClusterManager manager = new ClusterManager(clusters, d);
+
         List<MergeHistoryRecord> historyRecords = new ArrayList<>();
         int cntIter = 0;
         long startTime = System.currentTimeMillis();
         while (manager.size() != 1){
+            // Cerca le coppie di cluster a distanza minima
             List<MinDistancePair> minDistancePairs = manager.findMinDistancePairs();
-            // indici dei cluster che ho mergiato in questa iterazione
+
+            // Tengo traccia dei cluster che ho mergiato in questa iterazione
             // Questo perché lo stesso cluster può comparire in più coppie a distanza minima
             Set<Integer> mergedCluster = new HashSet<>();
             List<Cluster> newClusters = new ArrayList<>();
 
+            // Effettua il merge di tutte le coppie a distanza minima
             for (MinDistancePair pair: minDistancePairs) {
                 int r = pair.getR();
                 int s = pair.getS();
@@ -60,21 +67,33 @@ public class HierarchicalClustering {
                         manager.size() - newClusters.size())
                 );
 
-
             }
 
+            // Cancella dal manager i cluster che sono stati mergiati tra loro.
             List<Integer> toDelete = new ArrayList<>();
             toDelete.addAll(mergedCluster);
             manager.deleteClusters(toDelete);
 
+            // Aggiunge al manager i nuovi cluster.
+            //
+            // IMPORTANTE: prima di effettuare l'inserimento devono essere stati eliminati i vecchi cluster, altrimenti
+            //             non c'è posto all'interno della matrice delle distanze del manager.
+            //
             for (Cluster c : newClusters) {
                 manager.insert(c);
             }
 
-            cntIter++;
+            // Per questa iterazione ho finito tutte le delete ed insert, posso quindi effettuare
+            // il resize della matrice e provare a liberare un po' di memoria.
+            //
+            // IMPORTANTE: questa operazione deve essere fatta DOPO tutte le cancellazioni e insierimenti
+            //
+            manager.resize();
 
+            cntIter++;
             if (cntIter % (printInterval)  == 0) {
-                System.out.println("Iterazione: " + cntIter + " numero di cluster presenti: "+ manager.size() + " - Tempo trascorso: "+ (System.currentTimeMillis() - startTime)/1000 + " s");
+                System.out.println("Iterazione: " + cntIter + " numero di cluster presenti: "+ manager.size() +
+                        " - Tempo trascorso: "+ (System.currentTimeMillis() - startTime)/1000 + " s");
             }
         }
         System.out.println("Iterazioni necessarie: "+cntIter);

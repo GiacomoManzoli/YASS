@@ -4,33 +4,64 @@ import bm.clustering.*;
 import bm.yass.DistanceManager;
 import bm.yass.DistanceMeasure;
 import bm.yass.Experiment;
+import com.sun.tools.corba.se.idl.IncludeGen;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Test {
 
 
-    // Possibili moduli per la pipeline
-    private static final String PIPE_CLUSTERING = "clustering";
-    private static final String PIPE_SAVE_GRAPH_DATA = "save_graph_data";
-    private static final String PIPE_SAVE_HISTORY = "save_history";
-    private static final String PIPE_LOAD_HISTORY = "load_history";
-    private static final String PIPE_MERGE_HISTORY = "merge_history";
-    private static final String PIPE_YASS_STEMMING = "YASS_stemming";
-    //Nomi delle directory
-    private static final String D_OUTPUTS = "../outputs";
-    private static final String DN_STEMMED_DICT = "stemmed_dict";
-    private static final String DN_HISTORIES = "histories";
-    private static final String DN_DATA = "graph_data";
+    private static final int N = 654230;
 
+    static private long _k(int i, int j){
+        long n = N;
+        long k = (n *(n-1))/2 - ( (n-i)*(n-i-1) )/2 + j - i - 1;
+        k = ( n*(n-1) )/2 - 1 - k;
+        return k;
+    }
+
+    static private int _i(long k){
+        long n = N;
+        k = ( n*(n-1) )/2 - 1 - k; // ritrasformo k
+        long i = n - 2 - (int)Math.floor(Math.sqrt(-8*k + 4*n*(n-1)-7)/2 - 0.5);
+        return  (int)i; // i
+    }
+
+    static private int _j(long k){
+        long n = N;
+        int i = _i(k); // _i trasforma k, quindi devo calcolarlo prima
+        k = (n*(n-1))/2 - 1 - k; // ritrasformo k
+        long j =  (k + i + 1 - (n*(n-1))/2 + ((n-i)*((n-i)-1))/2); // j
+        return (int)j;
+    }
 
 
     public static void main(String[] args) {
         List<String> lines = new ArrayList<>();
+        long tot = ((long)N*(N-1))/2;
+        for (int i = 0; i < Integer.MAX_VALUE; i++){
+            long k = ThreadLocalRandom.current().nextLong(0, tot);
+            int i1 = _i(k);
+            int j1 = _j(k);
+            long k2 = _k(i1,j1);
 
+            long tot2 = (i1*(i1-1))/2;
 
+            try {
+                assert k2 == k;
+                assert tot2 > 0;
+            } catch (Exception e) {
+                System.out.println("HAHA");
+            }
+            if (i % 5000 == 0){
+                System.out.println(""+i+" iterazioni senza incidenti");
+            }
+        }
+
+        /*
         try {
             File fileDir = new File("/Users/gmanzoli/ideaProjects/java-IR/lexicon/italian/AGZ1994.txt");
             BufferedReader in = new BufferedReader(

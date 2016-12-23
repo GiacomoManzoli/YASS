@@ -5,7 +5,9 @@ import bm.yass.DistanceMeasure;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 
-
+/**
+ * Classe che si occupa di gestire i cluster e la relativa matrice delle distanze.
+ * */
 class ClusterManager {
 
     static ForkJoinPool commonPool = new ForkJoinPool(); // Usa tutti i core possibili
@@ -15,7 +17,7 @@ class ClusterManager {
     MyCustomBigArray dist;
 
 
-    /* Formule per la conversione degli indici (occhio che la matrice è flippata)
+    /* Formule per la conversione degli indici (da notare che la matrice è flippata, quindi è necessario invertire k)
     * i = n - 2 - floor(sqrt(-8*k + 4*n*(n-1)-7)/2.0 - 0.5)
     * j = k + i + 1 - n*(n-1)/2 + (n-i)*((n-i)-1)/2
     * k = (n*(n-1)/2) - (n-i)*((n-i)-1)/2 + j - i - 1
@@ -31,7 +33,6 @@ class ClusterManager {
         long n = clusters.size();
         k = ( n*(n-1) )/2 - 1 - k; // ritrasformo k
         long i = n - 2 - (int)Math.floor(Math.sqrt(-8*k + 4*n*(n-1)-7)/2 - 0.5);
-        assert i <= Integer.MAX_VALUE;
         return  (int)i; // i
     }
 
@@ -40,31 +41,43 @@ class ClusterManager {
         int i = _i(k); // _i trasforma k, quindi devo calcolarlo prima
         k = (n*(n-1))/2 - 1 - k; // ritrasformo k
         long j =  (k + i + 1 - (n*(n-1))/2 + ((n-i)*((n-i)-1))/2); // j
-        assert j <= Integer.MAX_VALUE;
         return (int)j;
     }
 
-
-
+    /**
+     * Crea un nuovo manager per i cluster presenti in {@code clusters}, utilizzando come misura di distanza {@code d}.
+     * @param clusters clusters da inserire nel managare.
+     * @param d misura di distanza da utilizzare per definire la matrice.
+     * */
     ClusterManager(List<Cluster> clusters, DistanceMeasure d) {
         this.clusters = clusters;
         this.d = d;
-        int n = clusters.size();
-
+        // n in realtà sarebbe un int, ma lo dichiaro come long per evitare overflow nel calcolo di tot.
+        long n = clusters.size();
         long tot = (n*(n-1))/2;
         dist = new MyCustomBigArray(tot);
         System.out.println("Creo la matrice delle distanze...");
 
         long startTime = System.currentTimeMillis();
         BuildDistanceMatrixTask.buildDistanceMatrix(this, d);
-        System.out.println("Fine creazione matrice. Tempo necessario "+(System.currentTimeMillis()-startTime)/1000 +" s");
+        System.out.println("Fine creazione matrice. Tempo necessario "
+                                +(System.currentTimeMillis()-startTime)/1000 +" s");
     }
 
+    /**
+     * Rimuove dal manager i cluster il cui indice è presente nella lista {@code indexes}.
+     * Da notare che la rimozione viene fatta per indice e non per id dei cluster.
+     * @param indexes indici dei cluster da rimuovere
+     * */
     void deleteClusters(List<Integer> indexes){
+        // Ordino gli indici in ordine crescente
         Collections.sort(indexes);
         int n = clusters.size();
+        // La stessa coppia può comparire più di una volta, quindi le memorizzo in un set per evitare duplicati.
+        // Anziché memorizzare direttamente la coppia, calcolo subito l'indice della coppia nella matrice linearizzata.
         Set<Long> toDelete = new HashSet<>();
 
+        // Per ogni indice calcolo le coppie in cui compare
         for (int r : indexes) {
             // calcolo le coppie del tipo (*,r)
             for (int i = 0; i < r; i++) {
@@ -87,10 +100,11 @@ class ClusterManager {
         toDeleteIndexes.addAll(toDelete);
         // Ordino gli indici da cancellare in ordine decrescente
         Collections.sort(toDeleteIndexes);
+
         // Sovrascrivo i valori da cancellare compattando il vettore.
-        // Da notare la dimensione in memoria del vettore non decresce, questo per evitare di dover farne una copia.
-        // Un possibile miglioramento può essere che quando la parte garbage è tanto grande, si può effettuare il resize
-        long tot = (n*(n-1))/2;
+        // Anche qui può esserci un overflow, perché l'espressione per il calcolo di tot
+        // tipa come int se non metto il cast a Long
+        long tot = ((long)n*(n-1))/2;
         int cntDeleted = 0;
 
         for (long it = 0; it < tot; it++) {
@@ -119,84 +133,10 @@ class ClusterManager {
         }
     }
 
-    void deleteClusters(int r, int s){
-        // r < s
-        // Calcolo il numero di indici che devo cancellare
-        // Per ogni indice che cancello tutte le coppie in cui compare.
-        // Potenzialmente sono 2n, ma so che sono n, perché le coppie sono ordinate.
-        // -1 perché (r,s) è contanta 2 volte in n
-
-        int n = clusters.size();
-        long[] toDelete = new long[2*(n-1) -1]; // una coppia è presente 2 volte
-        int toDeleteCnt = 0;
-        // vale sempre r < s
-        // calcolo le coppie del tipo (*,r)
-        for (int i = 0; i < r; i++) {
-            long index = _k(i,r);
-            if (index >= 0 && index < dist.getSize()){
-                toDelete[toDeleteCnt] = index;
-                toDeleteCnt++;
-            }
-        }
-        // calcolo le coppie del tipo (r,*) (c'è (r,s))
-        // sono consecutive e ce ne sono n-r-1
-        for (int j = r+1; j < r+1+(n-r-1); j++) {
-            long index = _k(r,j);
-            if (index >= 0 && index < dist.getSize()){
-                toDelete[toDeleteCnt] = index;
-                toDeleteCnt++;
-            }
-        }
-        // calcolo le coppie del tipo (*,s)
-        for (int i = 0; i < s; i++) {
-            if (i == r)// # la coppia (r,s) l'ho già contata
-                continue;
-            long index = _k(i,s);
-            if (index >= 0 && index < dist.getSize()){
-                toDelete[toDeleteCnt] = index;
-                toDeleteCnt++;
-            }
-        }
-        // calcolo le coppie del tipo (s,*) (c'è (r,s))
-        // sono consecutive e ce ne sono n-r-1
-        for (int j = s+1; j < s+1+(n-s-1); j++) {
-            long index = _k(s,j);
-            if (index >= 0 && index < dist.getSize()){
-                toDelete[toDeleteCnt] = index;
-                toDeleteCnt++;
-            }
-        }
-        // Ordino gli indici da cancellare in ordine decrescente
-        Arrays.sort(toDelete);
-        // Sovrascrivo i valori da cancellare compattando il vettore.
-        // Da notare la dimensione in memoria del vettore non decresce, questo per evitare di dover farne una copia.
-        // Un possibile miglioramento può essere che quando la parte garbage è tanto grande, si può effettuare il resize
-        long tot = (n*(n-1))/2;
-        int cntDeleted = 0;
-
-        for (long it = 0; it < tot; it++) {
-            // Se non ho ancora cancellato niente e non
-            // devo cancellare l'indice corrente, passo all'elemento successivo
-            if (cntDeleted == 0 && it != toDelete[cntDeleted]) { continue; }
-
-            if (cntDeleted < toDelete.length && it == toDelete[cntDeleted])
-                cntDeleted += 1;
-
-            // Prima di copiare il prossimo indice, controllo di non copiare
-            // un indice che poi deve essere cancellato
-            while (cntDeleted < toDelete.length && it + cntDeleted == toDelete[cntDeleted])
-                cntDeleted += 1;
-
-            if (it + cntDeleted < tot)
-                dist.set(it, dist.get(it+cntDeleted));
-            else
-                break;
-        }
-
-        clusters.remove(r);
-        clusters.remove(s -1);
-    }
-
+    /**
+     * Inserire il cluster all'interno del manger.
+     * @param cluster cluster da inserire nel manager.
+     * */
     void insert(Cluster cluster){
         // Non serve modificare la dimensione del vettore, vado ad occupare lo spazio garbage del vettore.
         clusters.add(0, cluster);
@@ -210,6 +150,10 @@ class ClusterManager {
         }
     }
 
+    /**
+     * Ricerca in modo parallelo le coppie di cluster presenti nel manager che sono a distanza minima.
+     * @return lista di coppie di cluster presenti nel manager che sono a distanza minima.
+     * */
     List<MinDistancePair> findMinDistancePairs() {
         return FindMinDistancePairTask.findMinDistancePairs(this);
     }
@@ -220,5 +164,15 @@ class ClusterManager {
 
     Cluster getCluster(int i){
         return clusters.get(i);
+    }
+
+    /**
+     * Effettua il resize della matrice delle distanze.
+     * Serve per liberare della memoria dopo che sono state effettuate un certo numero di iterazioni.
+     * */
+    void resize() {
+        long n = this.clusters.size();
+        long newSize = (n*(n-1))/2;
+        dist.resize(newSize);
     }
 }

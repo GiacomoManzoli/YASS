@@ -2,14 +2,6 @@ package bm.clustering;
 
 public class MinDistancePair {
 
-    static MinDistancePair min(MinDistancePair p1, MinDistancePair p2){
-        if (p1.dist < p2.dist){
-            return p1;
-        } else {
-            return p2;
-        }
-    }
-
     private int r;
     private int s;
     private float dist;

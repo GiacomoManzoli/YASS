@@ -1,5 +1,8 @@
 package bm.clustering;
 
+/**
+ * Classe che descrive un operazione di merge effettuata dall'algoritmo di clustering.
+ * */
 public class MergeHistoryRecord {
 
     private int c1;
@@ -7,6 +10,13 @@ public class MergeHistoryRecord {
     private float dist;
     private int cnt;
 
+    /**
+     * Costruisce un nuovo record.
+     * @param c1 id del primo cluster mergiato.
+     * @param c2 id del secondo cluster mergiato.
+     * @param dist distanza dei due cluster.
+     * @param cnt numero di cluster rimanenti dopo l'operazione di merge.
+     * */
     public MergeHistoryRecord(int c1, int c2, float dist, int cnt) {
         this.c1 = c1;
         this.c2 = c2;
