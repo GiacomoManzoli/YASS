@@ -3,6 +3,7 @@ package bm.clustering;
 
 import bm.yass.DistanceMeasure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,7 +21,7 @@ public class Cluster {
      *  @return il nuovo cluster ottenuto mergiando i due cluster ricevuti come parametro.
      * */
     static Cluster merge(int id, Cluster c1, Cluster c2) {
-        List<String> newWords = c1.words.subList(0, c1.words.size());
+        List<String> newWords = (ArrayList<String>)((ArrayList<String>)c1.words).clone();
         newWords.addAll(c2.words);
         return new Cluster(id, newWords);
     }

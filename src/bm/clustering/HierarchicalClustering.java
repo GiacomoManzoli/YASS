@@ -21,7 +21,7 @@ public class HierarchicalClustering {
      * */
     public static List<MergeHistoryRecord> calculateClusters(DistanceMeasure d, List<String> words){
         int n = words.size();
-        int printInterval = (int)Math.max(100, n*0.005);
+        int printInterval = (int)Math.max(100, n*0.00005);
 
         // Crea n cluster, ognuno contenente una parola
         List<Cluster> clusters = new ArrayList<>();
@@ -89,7 +89,6 @@ public class HierarchicalClustering {
             // IMPORTANTE: questa operazione deve essere fatta DOPO tutte le cancellazioni e insierimenti
             //
             manager.resize();
-
             cntIter++;
             if (cntIter % (printInterval)  == 0) {
                 System.out.println("Iterazione: " + cntIter + " numero di cluster presenti: "+ manager.size() +

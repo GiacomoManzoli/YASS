@@ -70,20 +70,53 @@ class ClusterManager {
      * @param indexes indici dei cluster da rimuovere
      * */
     void deleteClusters(List<Integer> indexes){
+        /*
+        * PROBLEMA: le strutture dati di supporto a questo metodo possono richiede un'elevata quantità di spazio.
+        * Viene infatti utilizzato un Set, implementato con un hashmap, indicizzata per chiavi di tipo long.
+        *
+        * SOLUZIONE: l'eliminazione viene fatta in più passate. Così facendo l'occupazione in memoria è ridotta,
+        * anche se questo rende l'operazione meno efficiente in termini di tempo.
+        * */
+
         // Ordino gli indici in ordine crescente
         Collections.sort(indexes);
+        actuallyDeleteClusters(indexes);
+        //int start;
+        //for (start = 0; start + 4 < indexes.size(); start+= 4){
+        //    List<Integer> ar = new ArrayList<>();
+        //    for (Integer i:  indexes.subList(start, start+4)) {
+        //        ar.add(i);
+        //    }
+        //    actuallyDeleteClusters(ar);
+        //}
+        //List<Integer> ar = new ArrayList<>();
+        //for (Integer i:  indexes.subList(start, indexes.size())) {
+        //    ar.add(i);
+        //}
+        //try {
+        //    if(ar.size() > 0)
+        //        actuallyDeleteClusters(ar);
+        //} catch (Exception e) {
+        //    System.out.println(e.toString());
+        //    System.out.println();
+        //}
+    }
+
+    private void actuallyDeleteClusters(List<Integer> indexes) {
         int n = clusters.size();
         // La stessa coppia può comparire più di una volta, quindi le memorizzo in un set per evitare duplicati.
         // Anziché memorizzare direttamente la coppia, calcolo subito l'indice della coppia nella matrice linearizzata.
-        Set<Long> toDelete = new HashSet<>();
-
+        //Set<Long> toDelete = new HashSet<>();
+        List<Long> toDeleteIndexes = new ArrayList<>();
         // Per ogni indice calcolo le coppie in cui compare
         for (int r : indexes) {
             // calcolo le coppie del tipo (*,r)
             for (int i = 0; i < r; i++) {
                 long index = _k(i,r);
-                if (index >= 0 && index < dist.getSize()){
-                    toDelete.add(index);
+                if (index >= 0 && index < dist.getSize() ){
+                    //toDelete.add(index);
+                    if (! toDeleteIndexes.contains(index))
+                        toDeleteIndexes.add(index);
                 }
             }
             // calcolo le coppie del tipo (r,*) (c'è (r,s))
@@ -91,13 +124,15 @@ class ClusterManager {
             for (int j = r+1; j < r+1+(n-r-1); j++) {
                 long index = _k(r,j);
                 if (index >= 0 && index < dist.getSize()){
-                    toDelete.add(index);
+                    //toDelete.add(index);
+                    if (! toDeleteIndexes.contains(index))
+                        toDeleteIndexes.add(index);
                 }
             }
         }
 
-        List<Long> toDeleteIndexes = new ArrayList<>();
-        toDeleteIndexes.addAll(toDelete);
+        //List<Long> toDeleteIndexes = new ArrayList<>();
+        //toDeleteIndexes.addAll(toDelete);
         // Ordino gli indici da cancellare in ordine decrescente
         Collections.sort(toDeleteIndexes);
 
@@ -112,12 +147,15 @@ class ClusterManager {
             // devo cancellare l'indice corrente, passo all'elemento successivo
             if (cntDeleted == 0 && it != toDeleteIndexes.get(cntDeleted)) { continue; }
 
-            if (cntDeleted < toDelete.size() && it == toDeleteIndexes.get(cntDeleted))
+            //if (cntDeleted < toDelete.size() && it == toDeleteIndexes.get(cntDeleted))
+            if (cntDeleted < toDeleteIndexes.size() && it == toDeleteIndexes.get(cntDeleted))
                 cntDeleted += 1;
 
             // Prima di copiare il prossimo indice, controllo di non copiare
             // un indice che poi deve essere cancellato
-            while (cntDeleted < toDelete.size() && it + cntDeleted == toDeleteIndexes.get(cntDeleted))
+            //while (cntDeleted < toDelete.size() && it + cntDeleted == toDeleteIndexes.get(cntDeleted))
+            while (cntDeleted < toDeleteIndexes.size() && it + cntDeleted == toDeleteIndexes.get(cntDeleted))
+
                 cntDeleted += 1;
 
             if (it + cntDeleted < tot)
