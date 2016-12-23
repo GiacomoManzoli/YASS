@@ -80,43 +80,46 @@ class ClusterManager {
 
         // Ordino gli indici in ordine crescente
         Collections.sort(indexes);
-        actuallyDeleteClusters(indexes);
-        //int start;
-        //for (start = 0; start + 4 < indexes.size(); start+= 4){
-        //    List<Integer> ar = new ArrayList<>();
-        //    for (Integer i:  indexes.subList(start, start+4)) {
-        //        ar.add(i);
-        //    }
-        //    actuallyDeleteClusters(ar);
-        //}
-        //List<Integer> ar = new ArrayList<>();
-        //for (Integer i:  indexes.subList(start, indexes.size())) {
-        //    ar.add(i);
-        //}
-        //try {
-        //    if(ar.size() > 0)
-        //        actuallyDeleteClusters(ar);
-        //} catch (Exception e) {
-        //    System.out.println(e.toString());
-        //    System.out.println();
-        //}
+        //actuallyDeleteClusters(indexes);
+        int start;
+        int CHUNK_SIZE = 7;
+        for (start = 0; start + CHUNK_SIZE < indexes.size(); start+= CHUNK_SIZE){
+            List<Integer> ar = new ArrayList<>();
+            for (Integer i:  indexes.subList(start, start+CHUNK_SIZE)) {
+                ar.add(i);
+            }
+            actuallyDeleteClusters(ar);
+            // devo aggiunstare gli indici
+            for (int q = start+CHUNK_SIZE; q < indexes.size(); q++){
+                indexes.set(q, indexes.get(q) - CHUNK_SIZE);
+            }
+        }
+        List<Integer> ar = new ArrayList<>();
+        for (Integer i:  indexes.subList(start, indexes.size())) {
+            ar.add(i);
+        }
+        try {
+            if(ar.size() > 0)
+                actuallyDeleteClusters(ar);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            System.out.println();
+        }
     }
 
     private void actuallyDeleteClusters(List<Integer> indexes) {
         int n = clusters.size();
         // La stessa coppia può comparire più di una volta, quindi le memorizzo in un set per evitare duplicati.
         // Anziché memorizzare direttamente la coppia, calcolo subito l'indice della coppia nella matrice linearizzata.
-        //Set<Long> toDelete = new HashSet<>();
-        List<Long> toDeleteIndexes = new ArrayList<>();
+        Set<Long> toDelete = new HashSet<>();
+        //List<Long> toDeleteIndexes = new ArrayList<>();
         // Per ogni indice calcolo le coppie in cui compare
         for (int r : indexes) {
             // calcolo le coppie del tipo (*,r)
             for (int i = 0; i < r; i++) {
                 long index = _k(i,r);
                 if (index >= 0 && index < dist.getSize() ){
-                    //toDelete.add(index);
-                    if (! toDeleteIndexes.contains(index))
-                        toDeleteIndexes.add(index);
+                    toDelete.add(index);
                 }
             }
             // calcolo le coppie del tipo (r,*) (c'è (r,s))
@@ -124,15 +127,13 @@ class ClusterManager {
             for (int j = r+1; j < r+1+(n-r-1); j++) {
                 long index = _k(r,j);
                 if (index >= 0 && index < dist.getSize()){
-                    //toDelete.add(index);
-                    if (! toDeleteIndexes.contains(index))
-                        toDeleteIndexes.add(index);
+                    toDelete.add(index);
                 }
             }
         }
 
-        //List<Long> toDeleteIndexes = new ArrayList<>();
-        //toDeleteIndexes.addAll(toDelete);
+        List<Long> toDeleteIndexes = new ArrayList<>();
+        toDeleteIndexes.addAll(toDelete);
         // Ordino gli indici da cancellare in ordine decrescente
         Collections.sort(toDeleteIndexes);
 
