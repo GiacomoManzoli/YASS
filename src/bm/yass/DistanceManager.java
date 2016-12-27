@@ -1,6 +1,6 @@
 package bm.yass;
 
-// Todo: verificare che le distanze calcolate coincidano con quelle calcoalte in python
+
 
 public class DistanceManager {
 
@@ -34,7 +34,7 @@ public class DistanceManager {
                 int maxLen = Math.max(w1.length(), w2.length());
                 float d = 0;
                 for (int i = 0; i < maxLen; i++) {
-                    d += p(w1,w2,i);
+                    d += p(w1,w2,i) / Math.pow(2, i);
                 }
                 return d;
             }
