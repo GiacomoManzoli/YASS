@@ -141,7 +141,7 @@ public class Main {
             System.out.println("Per eseguire lo script è necessario fornire la descrizione di un esperimento");
             System.out.println("specificandola con il flag --file (-f)");
             System.out.println("");
-            System.out.println("$ java main.class -f <experiment_file_path>");
+            System.out.println("$ java -jar java-IR.jar -f <experiment_file_path>");
             return;
         }
         int cores = Runtime.getRuntime().availableProcessors();
@@ -157,7 +157,7 @@ public class Main {
 
         // Carico le eventuali stopword da rimuovere
         List<String> stopwords = new ArrayList<>();
-        if (!exp.getStopwordsPath().equals("") && exp.getStopwordsPath() != null) {
+        if (exp.getStopwordsPath() != null && !exp.getStopwordsPath().equals("")) {
             try {
                 File fileDir = new File(exp.getStopwordsPath());
                 BufferedReader in = new BufferedReader(
@@ -187,8 +187,12 @@ public class Main {
             String line;
             while ((line = in.readLine()) != null) {
                 line = line.trim();
-                line = line.split(",")[0];
-
+                if (exp.isTerrierLexicon()) {
+                    // Se il lexicon è nel formato
+                    //      erzboel,term111208 Nt=1 TF=1 @{0 3420690 3}
+                    // estra la parola, altrimenti usa direttamente la linea
+                    line = line.split(",")[0];
+                }
                 // Se devo scartare i numeri, scarto i numeri
                 if (exp.isDiscardNumbers() && Character.isDigit(line.charAt(0))) {
                     discardedNumbers++;
@@ -221,7 +225,7 @@ public class Main {
             if (exp.isSplitAllowed()){
                 mergeHistory = HierarchicalClustering.calculateClustersSplitting(exp.getDistanceMeasure(), lexicon);
             } else {
-                mergeHistory = HierarchicalClustering.calculateClustersSplitting(exp.getDistanceMeasure(), lexicon);
+                mergeHistory = HierarchicalClustering.calculateClusters(exp.getDistanceMeasure(), lexicon);
             }
 
             System.out.println("Completato clustering! Tempo trascorso: " + (System.currentTimeMillis() - startTime)/1000);

@@ -107,6 +107,11 @@ class ClusterManager {
         }
     }
 
+    /**
+     * Funzione d'utilità che rimuove effettivamente gli indici ricevuti come parametro dall'array.
+     *
+     * @param indexes Lista con gli indici da rimuovere
+     * */
     private void actuallyDeleteClusters(List<Integer> indexes) {
         int n = clusters.size();
         // La stessa coppia può comparire più di una volta, quindi le memorizzo in un set per evitare duplicati.

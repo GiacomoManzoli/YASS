@@ -4,6 +4,10 @@ import bm.yass.DistanceMeasure;
 
 import java.util.concurrent.RecursiveAction;
 
+
+/**
+ * Classe che implementa il calcolo parallelo della matrice delle distanze secondo una strategia divede-et-impera
+ * */
 public class BuildDistanceMatrixTask extends RecursiveAction {
 
     private static long SEQUENTIAL_THRESHOLD = 100000;
@@ -36,16 +40,13 @@ public class BuildDistanceMatrixTask extends RecursiveAction {
                 int j = manager._j(k);
                 manager.dist.set(k, manager.getCluster(i).distance(manager.getCluster(j), d));
             }
-
         } else {
-
             long mid = start + (end - start) / 2;
             BuildDistanceMatrixTask left  = new BuildDistanceMatrixTask(manager, d, start, mid);
             BuildDistanceMatrixTask right = new BuildDistanceMatrixTask(manager, d, mid, end);
             left.fork();
             right.compute();
             left.join();
-
         }
     }
 }

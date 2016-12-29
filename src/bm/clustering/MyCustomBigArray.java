@@ -4,7 +4,10 @@ package bm.clustering;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyCustomBigArray {
+/**
+ * Classe che implementa una stuttura dati simile ad un array di float ma che può contenere più di 2^31-1 elementi.
+ * */
+class MyCustomBigArray {
 
     //private static final int ARRAY_SIZE = 10;
     private static final int ARRAY_SIZE = Integer.MAX_VALUE/2;
@@ -13,7 +16,7 @@ public class MyCustomBigArray {
     private int arraysCount;
     private List<float[]> arrays;
 
-    public MyCustomBigArray(long size){
+    MyCustomBigArray(long size){
         this.size = size;
         arraysCount = (int)Math.ceil(size / (double)ARRAY_SIZE);
         arrays = new ArrayList<>();
@@ -25,7 +28,7 @@ public class MyCustomBigArray {
         arrays.add(new float[reminder]);
     }
 
-    public void set(long index, float value) {
+    void set(long index, float value) {
         int arrayIndex = (int) (index / (long)ARRAY_SIZE);
         int innerIndex = (int) (index - ((long)arrayIndex * (long)ARRAY_SIZE));
 
@@ -44,7 +47,7 @@ public class MyCustomBigArray {
         }
     }
 
-    public float get(long index) {
+    float get(long index) {
         int arrayIndex = (int) (index / (long)ARRAY_SIZE);
         int innerIndex = (int) (index - ((long)arrayIndex * (long)ARRAY_SIZE));
         try{
@@ -63,7 +66,7 @@ public class MyCustomBigArray {
         }
     }
 
-    public void resize(long newSize) {
+    void resize(long newSize) {
         // Se ci sono degli array extra li butta via
         int newArraysCount = (int)Math.ceil(newSize / (double)ARRAY_SIZE);
         if (newArraysCount < arraysCount) {
@@ -74,7 +77,7 @@ public class MyCustomBigArray {
         }
     }
 
-    public long getSize() {
+    long getSize() {
         return size;
     }
 }

@@ -84,14 +84,14 @@ public class MergeHistoryRecord implements Comparable{
         }
     }
 
-    public void setC1(Integer c1) {
+    void setC1(Integer c1) {
         this.c1 = c1;
     }
-    public void setC2(Integer c2) {
+    void setC2(Integer c2) {
         this.c2 = c2;
     }
 
-    public void setCnt(int cnt) {
+    void setCnt(int cnt) {
         this.cnt = cnt;
     }
 
@@ -99,7 +99,7 @@ public class MergeHistoryRecord implements Comparable{
         return cres;
     }
 
-    public void setCres(int cres) {
+    void setCres(int cres) {
         this.cres = cres;
     }
 }

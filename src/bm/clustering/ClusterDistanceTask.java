@@ -5,9 +5,25 @@ import bm.yass.DistanceMeasure;
 import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
+/**
+ * Classe che implementa il calcolo parallelo della distanza in complete linkage tra due cluster secondo una strategia
+ * divide-et-impera.
+ * La divisione viene effettauta enumerando tutte le coppie di parole da considerare.
+ * */
 public class ClusterDistanceTask extends RecursiveTask<Float> {
 
     private static long SEQUENTIAL_THRESHOLD = 5000;
+
+    static float calculateClusterDistance(Cluster c1, Cluster c2, DistanceMeasure d) {
+        // Da notare
+        int n1 = c1.getWords().size();
+        int n2 = c2.getWords().size();
+        long last = n1 * n2;
+        // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
+        int cores = Runtime.getRuntime().availableProcessors();
+        SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) last / (4.0*cores));
+        return ClusterManager.commonPool.invoke(new ClusterDistanceTask(c1, c2, d, 0, last));
+    }
 
     private Cluster c1;
     private Cluster c2;
@@ -64,16 +80,5 @@ public class ClusterDistanceTask extends RecursiveTask<Float> {
             float leftAns  = left.join();
             return Math.max(rightAns, leftAns);
         }
-    }
-
-    static float calculateClusterDistance(Cluster c1, Cluster c2, DistanceMeasure d) {
-        // Da notare
-        int n1 = c1.getWords().size();
-        int n2 = c2.getWords().size();
-        long last = n1 * n2;
-        // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
-        int cores = Runtime.getRuntime().availableProcessors();
-        SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) last / (4.0*cores));
-        return ClusterManager.commonPool.invoke(new ClusterDistanceTask(c1, c2, d, 0, last));
     }
 }

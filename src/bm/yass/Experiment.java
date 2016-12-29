@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Classe che rappresenta un esperimento.
+ * */
 public class Experiment{
 
     // Chiavi per il file JSON
@@ -20,6 +23,7 @@ public class Experiment{
     private static final String P_DISCARD_NUMBERS = "experiment.discard_numbers";
     private static final String P_STOPWORDS_PATH = "experiment.stopwords";
     private static final String P_ALLOW_SPLIT = "experiment.allow_split";
+    private static final String P_TERRIER_LEXICON = "experiment.terrier_lexicon";
 
     public static Experiment loadFromFile(String filePath){
         Experiment e = new Experiment();
@@ -40,6 +44,7 @@ public class Experiment{
             e.stopwordsPath = prop.getProperty(P_STOPWORDS_PATH);
             e.discardNumbers = Boolean.parseBoolean(prop.getProperty(P_DISCARD_NUMBERS));
             e.allowSplit = Boolean.parseBoolean(prop.getProperty(P_ALLOW_SPLIT));
+            e.terrierLexicon = Boolean.parseBoolean(prop.getProperty(P_TERRIER_LEXICON));
 
             String distanceName = prop.getProperty(P_DISTANCE);
             Method distanceCreator = DistanceManager.class.getMethod(distanceName);
@@ -87,6 +92,7 @@ public class Experiment{
     private boolean discardNumbers;
     private String stopwordsPath;
     private boolean allowSplit;
+    private boolean terrierLexicon;
 
 
     public String getName() {
@@ -127,5 +133,9 @@ public class Experiment{
 
     public boolean isSplitAllowed() {
         return allowSplit;
+    }
+
+    public boolean isTerrierLexicon() {
+        return terrierLexicon;
     }
 }

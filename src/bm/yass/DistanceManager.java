@@ -1,7 +1,8 @@
 package bm.yass;
 
-
-
+/**
+ * Classe che implementa le varie distanze definite nel paper YASS.
+ * */
 public class DistanceManager {
 
     private static float INFINITY = Float.POSITIVE_INFINITY;

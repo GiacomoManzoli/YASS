@@ -4,8 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.RecursiveTask;
 
+/**
+ * Classe che implementa il la ricerca parallela delle coppie a distanza minima, secondo una strategia divide-et-impera
+ * */
 public class FindMinDistancePairTask extends RecursiveTask<List<MinDistancePair>>{
     private static long SEQUENTIAL_THRESHOLD = 100000;
+
+    static List<MinDistancePair> findMinDistancePairs(ClusterManager manager) {
+        // Da notare
+        long n = manager.size();
+        long last = (n * (n-1))/(long)2;
+        // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
+        int cores = Runtime.getRuntime().availableProcessors();
+        SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) last / (4.0*cores));
+
+        return ClusterManager.commonPool.invoke(new FindMinDistancePairTask(manager, 0, last));
+    }
 
     private ClusterManager manager;
     private long start;
@@ -82,16 +96,5 @@ public class FindMinDistancePairTask extends RecursiveTask<List<MinDistancePair>
             }
 
         }
-    }
-
-    static List<MinDistancePair> findMinDistancePairs(ClusterManager manager) {
-        // Da notare
-        long n = manager.size();
-        long last = (n * (n-1))/(long)2;
-        // Cerco di bilanciare la soglia di split in base al numero di core disponibili sulla macchina
-        int cores = Runtime.getRuntime().availableProcessors();
-        SEQUENTIAL_THRESHOLD = (long)Math.ceil((double) last / (4.0*cores));
-
-        return ClusterManager.commonPool.invoke(new FindMinDistancePairTask(manager, 0, last));
     }
 }

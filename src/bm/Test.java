@@ -10,6 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+
+/**
+ * Classe utilizzata per effettuare varie prove durante lo sviluppo dell'applicazione
+ * */
 public class Test {
 
 
